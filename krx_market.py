@@ -151,6 +151,9 @@ def render_market(secret_value):
                 display.index = range(1, len(display) + 1)
                 st.dataframe(display, width='stretch', height=390)
         st.caption('거래량·거래대금이 0이거나 필수 숫자가 없는 종목은 제외합니다. 거래대금 단위: 억원. 전체 조회는 두 시장의 동일 기준일을 사용합니다.')
+    if result:
+        from investors import render_investors
+        render_investors(secret_value, result)
     with st.expander('KRX 연결 도움말'):
         st.markdown('''- Secrets 변수 이름은 **KRX_API_KEY**입니다(`KRX_AUTH_KEY`도 지원).
 - KRX **유가증권 일별매매정보**와 **코스닥 일별매매정보**의 이용승인을 확인하세요.
