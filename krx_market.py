@@ -138,7 +138,7 @@ def render_market(secret_value):
         summary[1].metric('상승 종목', f"{(frame['등락률'] > 0).sum():,}개")
         summary[2].metric('하락 종목', f"{(frame['등락률'] < 0).sum():,}개")
         summary[3].metric('거래대금 합계', f"{frame['거래대금'].sum() / 1e12:,.2f}조원")
-        for container, title, table in zip(st.columns(3), ['🔴 상승률 상위 10종목', '🔵 하락률 상위 10종목', '거래대금 상위 10종목'], rankings(frame)):
+        for container, title, table in zip(st.columns(3), ['상승률 상위 10종목', '하락률 상위 10종목', '거래대금 상위 10종목'], rankings(frame)):
             with container:
                 st.subheader(title)
                 if table.empty:
@@ -157,3 +157,4 @@ def render_market(secret_value):
 - 코스피만 승인되었다면 시장을 **코스피**로 선택하세요.
 - 인증·이용권한 오류와 데이터가 없는 날짜는 구분해서 안내합니다.
 - 입력한 날짜에 데이터가 없으면 이전 14일까지 확인합니다.''')
+

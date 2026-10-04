@@ -15,7 +15,7 @@ class KiwoomError(RuntimeError):
 
 
 def number(value, absolute=False):
-    text = str(value or '').strip().replace(',', '').replace('%', '')
+    text = str('' if value is None else value).strip().replace(',', '').replace('%', '')
     if not text:
         return None
     try:
@@ -83,6 +83,26 @@ class KiwoomClient:
         if not number(data.get('cur_prc'), True):
             raise KiwoomError('현재가 데이터가 없습니다. 모의투자 조회 지원 여부와 종목코드를 확인해 주세요.')
         return data
+
+    def holdings(self):
+        body = {'qry_tp': '1', 'dmst_stex_tp': 'KRX'}
+        rows, summary, continuation, seen = [], None, None, set()
+        for _ in range(100):
+            data, headers = self.query('kt00018', '/api/dostk/acnt', body, continuation)
+            if summary is None:
+                summary = {key: data.get(key) for key in ('tot_pur_amt', 'tot_evlt_amt', 'tot_evlt_pl')}
+            page = data.get('acnt_evlt_remn_indv_tot')
+            if not isinstance(page, list) or any(not isinstance(row, dict) for row in page):
+                raise KiwoomError('보유종목 응답 형식이 예상과 다릅니다. 다시 조회해 주세요.')
+            rows.extend(page)
+            if headers.get('cont-yn') != 'Y':
+                return summary, rows
+            next_key = headers.get('next-key')
+            if not next_key or next_key in seen:
+                raise KiwoomError('보유종목 연속조회가 완료되지 않았습니다. 다시 조회해 주세요.')
+            seen.add(next_key)
+            continuation = next_key
+        raise KiwoomError('보유종목 조회 한도에 도달했습니다. 일부 자료는 표시하지 않습니다.')
 
     def history(self, code, months=6):
         today = datetime.now(SEOUL)

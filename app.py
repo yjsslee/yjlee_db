@@ -15,18 +15,23 @@ STOCKS = {'삼성전자': '005930', 'SK하이닉스': '000660', '두산에너빌
 SECRET_EXAMPLE = 'KIWOOM_APP_KEY = "모의투자용 App Key"\nKIWOOM_APP_SECRET = "모의투자용 App Secret"'
 
 st.markdown('''<style>
-.stApp {background:#F5F7FA;color:#263238;}
+.stApp {background:#F7F8F3;color:#35443F;}
 .block-container {max-width:1400px;padding-top:2.5rem;}
-h1,h2,h3 {color:#17365D!important;}
-.subtitle {color:#738096;margin-top:-8px;margin-bottom:22px;}
-.stock-card {background:#fff;border:1px solid #E7ECF2;border-radius:14px;padding:26px;margin-bottom:18px;min-height:215px;}
-.stock-name {font-size:23px;font-weight:700;color:#17365D;}
-.stock-code {font-size:14px;color:#738096;margin-top:5px;}
+h1,h2,h3 {color:#526B61!important;}
+.subtitle {color:#75817B;margin-top:-8px;margin-bottom:22px;}
+.stock-card {background:#FFFEFC;border:1px solid #E2E8DF;border-radius:14px;padding:26px;margin-bottom:18px;min-height:215px;}
+.stock-name {font-size:23px;font-weight:700;color:#526B61;}
+.stock-code {font-size:14px;color:#75817B;margin-top:5px;}
 .stock-price {font-size:36px;font-weight:750;margin:13px 0 4px;}
 .stock-change {font-size:19px;font-weight:650;}
-.badge {display:inline-block;background:#E7EDF5;color:#17365D;border-radius:8px;padding:6px 12px;font-size:14px;}
-[data-testid="stVerticalBlockBorderWrapper"] {background:white;border-radius:14px;}
-div[data-testid="stMetricValue"] {font-size:25px;}
+.badge {display:inline-block;background:#E5EEE6;color:#526B61;border-radius:8px;padding:6px 12px;font-size:14px;}
+[data-testid="stVerticalBlockBorderWrapper"] {background:#FFFEFC;border-radius:14px;}
+div[data-testid="stMetricValue"] {font-size:25px;color:#35443F;}
+[data-testid="stTabs"] [role="tablist"] {background:#EAF0E8;border-radius:12px;padding:5px 10px;gap:20px;}
+[data-testid="stTabs"] [aria-selected="true"] {color:#465F54!important;}
+.stock-card {border-top:4px solid #BED0C1;}
+[data-testid="stMetric"] {background:#F1F4ED;border-radius:10px;padding:16px;}
+
 </style>''', unsafe_allow_html=True)
 
 def secret_value(name):
@@ -48,7 +53,7 @@ def show_card(name, code, data=None):
         change = abs(change)
     if rate is not None and change is not None and change != 0:
         rate = abs(rate) * (1 if change > 0 else -1)
-    color = '#D9363E' if (change or 0) > 0 else '#246BCE' if (change or 0) < 0 else '#738096'
+    color = '#A15D62' if (change or 0) > 0 else '#587CA1' if (change or 0) < 0 else '#75817B'
     label = '조회 전' if data is None else '등락 정보 없음'
     if change is not None and rate is not None:
         label = f'{change:+,.0f}원 ({rate:+.2f}%)'
@@ -139,12 +144,12 @@ def render_watchlist():
                 st.info('선택 기간의 일봉 데이터가 없습니다.')
             else:
                 fig = go.Figure(go.Scatter(x=selected['날짜'], y=selected['종가'], mode='lines',
-                    line={'color': '#17365D', 'width': 2.5},
+                    line={'color': '#526B61', 'width': 2.5},
                     hovertemplate='%{x|%Y-%m-%d}<br>종가 %{y:,.0f}원<extra></extra>'))
                 fig.update_layout(height=390, margin={'l': 15, 'r': 15, 't': 20, 'b': 20},
-                    paper_bgcolor='white', plot_bgcolor='white', font={'color': '#738096'},
-                    xaxis={'title': None, 'gridcolor': '#EDF1F5', 'tickformat': '%m월 %d일'},
-                    yaxis={'title': None, 'gridcolor': '#EDF1F5', 'ticksuffix': '원', 'tickformat': ','})
+                    paper_bgcolor='#FFFEFC', plot_bgcolor='#FFFEFC', font={'color': '#75817B'},
+                    xaxis={'title': None, 'gridcolor': '#ECEEE9', 'tickformat': '%m월 %d일'},
+                    yaxis={'title': None, 'gridcolor': '#ECEEE9', 'ticksuffix': '원', 'tickformat': ','})
                 st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})
                 st.caption(f"{name} · 수정주가 일봉 종가 · 최신 일봉 {selected['날짜'].max():%Y-%m-%d} · {len(selected)}개 거래일")
         except KiwoomError as exc:
@@ -167,8 +172,14 @@ def render_watchlist():
 
 from krx_market import render_market
 
-watch_tab, market_tab = st.tabs(["관심종목", "국내시장 요약"])
+from holdings import render_holdings
+
+watch_tab, market_tab, holdings_tab = st.tabs(["관심종목", "국내시장 요약", "내 보유종목"])
 with watch_tab:
     render_watchlist()
 with market_tab:
     render_market(secret_value)
+
+
+with holdings_tab:
+    render_holdings(secret_value)
